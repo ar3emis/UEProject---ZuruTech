@@ -1,0 +1,8 @@
+Content/__ExternalActors__/
+Content/__ExternalObjects__/
+*DebugGame*
+Intermediate
+*.exp
+*.lib
+*.pdb
+*.exe
