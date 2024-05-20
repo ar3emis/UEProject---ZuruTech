@@ -6,3 +6,6 @@ Intermediate
 *.lib
 *.pdb
 *.exe
+Saved/
+*.vsconfig
+.idea/

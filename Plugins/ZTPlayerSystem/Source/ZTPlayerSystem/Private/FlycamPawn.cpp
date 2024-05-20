@@ -112,7 +112,7 @@ void AFlycamPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 				SubSystem->AddMappingContext(InputMappingContext, 0);
 			}
 		}
-		
+		 
 	}
 }
 

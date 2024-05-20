@@ -2,11 +2,14 @@
 
 
 #include "ZTPlayerController.h"
+
+#include "EngineUtils.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
 #include "Engine/StaticMeshActor.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "SubSystems/ZTGameInstanceSubsystem.h"
 
 AZTPlayerController::AZTPlayerController()
 {
@@ -39,10 +42,20 @@ void AZTPlayerController::SetupInputComponent()
 
 		UInputAction* ClickAction = NewObject<UInputAction>();
 		ClickAction->ValueType = EInputActionValueType::Boolean;
-
 		InputMappingContext->MapKey(ClickAction, EKeys::LeftMouseButton);
-
 		EnhancedInputComponent->BindAction(ClickAction, ETriggerEvent::Triggered, this, &AZTPlayerController::ProcessMouseClick);
+
+		UInputAction* SaveAction = NewObject<UInputAction>();
+		SaveAction->ValueType = EInputActionValueType::Boolean;
+		InputMappingContext->MapKey(SaveAction, EKeys::Tab);
+		EnhancedInputComponent->BindAction(SaveAction, ETriggerEvent::Triggered, this, &AZTPlayerController::SaveSlot);
+
+		
+		UInputAction* LoadAction = NewObject<UInputAction>();
+		LoadAction->ValueType = EInputActionValueType::Boolean;
+		InputMappingContext->MapKey(LoadAction, EKeys::L);
+		EnhancedInputComponent->BindAction(LoadAction, ETriggerEvent::Triggered, this, &AZTPlayerController::LoadSlot);
+
 
 		if(UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
 		{
@@ -66,7 +79,7 @@ void AZTPlayerController::SpawnMeshFromMeshData(const FMeshData& MeshData)
 		{
 			SpawnedMesh->GetStaticMeshComponent()->SetMobility(EComponentMobility::Movable);
 			SpawnedMesh->GetStaticMeshComponent()->SetStaticMesh(MeshData.Mesh);
-
+			SpawnedMesh->Tags.Add("PlayerSpawned");
 			if(BaseMaterial)
 			{
 				if(UMaterialInstanceDynamic* DynamicMatInstance = UMaterialInstanceDynamic::Create(BaseMaterial, this))
@@ -78,6 +91,14 @@ void AZTPlayerController::SpawnMeshFromMeshData(const FMeshData& MeshData)
 				}
 				
 			}
+
+			FSaveSlotData SaveSlotData;
+			SaveSlotData.ActorName = SpawnedMesh->GetName();
+			SaveSlotData.ActorMesh = MeshData.Mesh;
+			SaveSlotData.ActorTransform = SpawnedMesh->GetActorTransform();
+
+			SaveSlotMeshInfo.Add(SaveSlotData);
+		
 		}
 	}
 }
@@ -110,6 +131,93 @@ void AZTPlayerController::ProcessMouseClick()
 					
 					OnFloorDetected();
 				}
+			}
+			
+		}
+	}
+}
+
+void AZTPlayerController::SaveSlot()
+{
+	if(UZTGameInstanceSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UZTGameInstanceSubsystem>())
+	{
+		FString CurrentSaveSlotName = Subsystem->GetCurrentSaveSlotName();
+		if(CurrentSaveSlotName.IsEmpty())
+		{
+			Subsystem->CreateSaveGameSlot("ZTSaveSlot");	
+		}
+
+		for(int iIndex = 0; iIndex < SaveSlotMeshInfo.Num(); iIndex++)
+		{
+			
+			FSaveSlotData SaveSlotData = SaveSlotMeshInfo[iIndex];
+			FZTSaveSlot& SaveSlot = Subsystem->GetCurrentSaveGame()->SaveSlots.FindOrAdd(CurrentSaveSlotName);
+			SaveSlot.SavedActors.Add(SaveSlotData);
+		}
+		
+		Subsystem->SaveGame();
+	}
+}
+
+void AZTPlayerController::LoadSlot()
+{
+	if(UZTGameInstanceSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UZTGameInstanceSubsystem>())
+	{
+		
+		FString SlotName = "ZTSaveSlot";
+
+		Subsystem->LoadGame(SlotName);
+		
+		FString CurrentSaveSlotName = Subsystem->GetCurrentSaveSlotName();
+		if(!CurrentSaveSlotName.IsEmpty())
+		{
+		
+			UZTPlayerSaveGame* CurrentSaveGame = Subsystem->GetCurrentSaveGame();
+			if(FZTSaveSlot* SaveSlot = CurrentSaveGame->SaveSlots.Find(SlotName))
+			{
+				TArray<AActor*> ActorstoDestroy;
+				for(TActorIterator<AActor> It(GetWorld()); It; ++It)
+				{
+					AActor* Actor = *It;
+					if(Actor->ActorHasTag("PlayerSpawned"))
+					{
+						ActorstoDestroy.Add(Actor);
+					}
+				}
+
+				for(auto& Actor : ActorstoDestroy)
+				{
+					Actor->Destroy();
+				}
+
+				
+				for(auto& SaveData :SaveSlot->SavedActors)
+				{
+					FActorSpawnParameters SpawnParameters;
+					SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+					if(AStaticMeshActor* SpawnedMesh = GetWorld()->SpawnActor<AStaticMeshActor>(SaveData.ActorTransform.GetLocation(), SaveData.ActorTransform.GetRotation().Rotator(), SpawnParameters))
+					{
+						SpawnedMesh->SetActorRelativeScale3D(SaveData.ActorTransform.GetScale3D());
+						
+						SpawnedMesh->GetStaticMeshComponent()->SetMobility(EComponentMobility::Movable);
+						SpawnedMesh->GetStaticMeshComponent()->SetStaticMesh(SaveData.ActorMesh);
+						SpawnedMesh->SetActorLabel(SaveData.ActorName);
+						
+						SpawnedMesh->Tags.Add("PlayerSpawned");
+						if(BaseMaterial)
+						{
+							if(UMaterialInstanceDynamic* DynamicMatInstance = UMaterialInstanceDynamic::Create(BaseMaterial, this))
+							{
+								DynamicMatInstance->SetScalarParameterValue("Tiling", 5);
+								DynamicMatInstance->SetVectorParameterValue("BaseColor", FLinearColor::Green);
+
+								SpawnedMesh->GetStaticMeshComponent()->SetMaterial(0, DynamicMatInstance);
+							}
+				
+						}
+					}
+				}
+				
 			}
 			
 		}
