@@ -9,7 +9,8 @@ TSharedRef<SWidget> UScrollableAssetBox::RebuildWidget()
 {
 	ScrollableAssetBox = SNew(SScrollableAssetBox).InMeshDataAsset(MeshDataAsset).ThumbnailSizeScale(ThumbnailSizeScale);
 	ScrollableAssetBox->OnAssetThumbnailSelected.BindUObject(this, &UScrollableAssetBox::HandleAssetThumbnailSelected);
-	
+
+
 	return ScrollableAssetBox.ToSharedRef();
 }
 

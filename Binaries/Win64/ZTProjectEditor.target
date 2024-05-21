@@ -3422,6 +3422,14 @@
 			"Type": "SymbolFile"
 		},
 		{
+			"Path": "$(ProjectDir)/Plugins/ZTPlayerSystem/Binaries/Win64/UnrealEditor-ZTPlayerTest.dll",
+			"Type": "DynamicLibrary"
+		},
+		{
+			"Path": "$(ProjectDir)/Plugins/ZTPlayerSystem/Binaries/Win64/UnrealEditor-ZTPlayerTest.pdb",
+			"Type": "SymbolFile"
+		},
+		{
 			"Path": "$(ProjectDir)/Plugins/ZTPlayerSystem/Binaries/Win64/UnrealEditor.modules",
 			"Type": "RequiredResource"
 		}

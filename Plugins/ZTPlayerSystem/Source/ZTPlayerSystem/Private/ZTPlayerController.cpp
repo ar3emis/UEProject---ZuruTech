@@ -30,6 +30,21 @@ void AZTPlayerController::BeginPlay()
 			
 		}
 	}
+
+	OnMeshDataSpawned.AddUObject(this, &AZTPlayerController::HandleMeshDataSpawned);
+	OnMeshDataChildSpawn.AddUObject(this, &AZTPlayerController::HandleMeshDataChildSpawned);
+}
+
+void AZTPlayerController::HandleMeshDataSpawned(FMeshData MeshData)
+{
+	int i = 0;
+	OnSomeFunctions(0);
+}
+
+
+void AZTPlayerController::HandleMeshDataChildSpawned(FMeshData MeshData)
+{
+	int i = 0;
 }
 
 void AZTPlayerController::SetupInputComponent()
@@ -98,6 +113,9 @@ void AZTPlayerController::SpawnMeshFromMeshData(const FMeshData& MeshData)
 			SaveSlotData.ActorTransform = SpawnedMesh->GetActorTransform();
 
 			SaveSlotMeshInfo.Add(SaveSlotData);
+
+			OnMeshDataSpawned.Broadcast(MeshData);
+			OnMeshDataChildSpawn.Broadcast(MeshData);
 		
 		}
 	}
@@ -144,7 +162,7 @@ void AZTPlayerController::SaveSlot()
 		FString CurrentSaveSlotName = Subsystem->GetCurrentSaveSlotName();
 		if(CurrentSaveSlotName.IsEmpty())
 		{
-			Subsystem->CreateSaveGameSlot("ZTSaveSlot");	
+			Subsystem->CreateSaveGameSlot(SaveSlotName);	
 		}
 
 		for(int iIndex = 0; iIndex < SaveSlotMeshInfo.Num(); iIndex++)
@@ -164,7 +182,7 @@ void AZTPlayerController::LoadSlot()
 	if(UZTGameInstanceSubsystem* Subsystem = GetGameInstance()->GetSubsystem<UZTGameInstanceSubsystem>())
 	{
 		
-		FString SlotName = "ZTSaveSlot";
+		FString SlotName = SaveSlotName;
 
 		Subsystem->LoadGame(SlotName);
 		

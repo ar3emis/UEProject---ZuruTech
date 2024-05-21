@@ -9,9 +9,8 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAssetThumbnailSelectedEvent, const FMeshData&, MeshData);
 
-/**
- * 
- */
+
+
 UCLASS()
 class ZTPLAYERSYSTEM_API UScrollableAssetBox : public UWidget
 {
@@ -39,6 +38,5 @@ protected:
 private:
 
 	TSharedPtr<SScrollableAssetBox> ScrollableAssetBox;
-
 	
 };

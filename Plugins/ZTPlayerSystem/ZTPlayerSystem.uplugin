@@ -19,8 +19,12 @@
 			"Name": "ZTPlayerSystem",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "ZTPlayerTest",
+			"Type": "Developer",
+			"LoadingPhase": "Default"
 		}
-	
 	],
 	"Plugins": [
 		{

@@ -11,10 +11,12 @@
 #include "ZTPlayerController.generated.h"
 
 
+DECLARE_EVENT_OneParam(AZTPlayerController, FOnMeshDataSpawned, FMeshData)
 
-/**
- * 
- */
+
+// DECLARE_MULTICAST_DELEGATE_OneParam(FOnMeshDataSpawned, FMeshData)
+
+
 UCLASS()
 class ZTPLAYERSYSTEM_API AZTPlayerController : public APlayerController
 {
@@ -25,8 +27,6 @@ protected:
 
 	AZTPlayerController();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="MeshData")
-	UMaterialInterface* BaseMaterial;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="MeshData")
 	UMeshDataAsset* MeshDataAsset;
@@ -40,25 +40,44 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Trace")
 	void OnFloorDetected();
 
-	UPROPERTY()
-	FVector LastHitLocation;
-
+	
 	UPROPERTY()
 	TArray<FSaveSlotData> SaveSlotMeshInfo;
 	
 
 	virtual void BeginPlay() override;
+	void HandleMeshDataSpawned(FMeshData MeshData);
+	void HandleMeshDataChildSpawned(FMeshData MeshData);
 	virtual void SetupInputComponent() override;
+
+
+	void ProcessMouseClick();
+
+
+	UFUNCTION(BlueprintCallable, Category="SaveGame")
+	void LoadSlot();
+
+public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="MeshData")
+	UMaterialInterface* BaseMaterial;
+
+	UPROPERTY()
+	FString SaveSlotName;
+	
+	UPROPERTY()
+	FVector LastHitLocation;
 
 	UFUNCTION()
 	void SpawnMeshFromMeshData(const FMeshData& MeshData);
 
-	void ProcessMouseClick();
 
 	UFUNCTION(BlueprintCallable, Category="SaveGame")
 	void SaveSlot();
 
-	UFUNCTION(BlueprintCallable, Category="SaveGame")
-	void LoadSlot();
-	
+	FOnMeshDataSpawned OnMeshDataSpawned;
+	FOnMeshDataSpawned OnMeshDataChildSpawn;
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnSomeFunctions(float P);
 };

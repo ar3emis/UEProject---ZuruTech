@@ -2,6 +2,7 @@
 	"BuildId": "25360045",
 	"Modules": 
 	{
-		"ZTPlayerSystem": "UnrealEditor-ZTPlayerSystem.dll"
+		"ZTPlayerSystem": "UnrealEditor-ZTPlayerSystem.dll",
+		"ZTPlayerTest": "UnrealEditor-ZTPlayerTest.dll"
 	}
 }

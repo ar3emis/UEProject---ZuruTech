@@ -8,6 +8,8 @@
 #include "Widgets/Layout/SScrollBox.h"
 
 DECLARE_DELEGATE_OneParam(FAssetThumbnailSelected, const FMeshData&)
+
+
 /**
  * 
  */
@@ -34,5 +36,6 @@ private:
 	
 	TWeakObjectPtr<UMeshDataAsset> MeshDataAsset;
 	TSharedPtr<SScrollBox> ScrollBox;
-	
+
+
 };

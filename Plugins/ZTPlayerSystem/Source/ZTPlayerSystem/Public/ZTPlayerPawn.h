@@ -3,8 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ZTPlayerController.h"
 #include "GameFramework/Pawn.h"
 #include "ZTPlayerPawn.generated.h"
+
+DECLARE_DERIVED_EVENT(AZTPlayerPawn, FOnMeshDataSpawned, FOnMeshDataChildSpawn)
 
 UCLASS()
 class ZTPLAYERSYSTEM_API AZTPlayerPawn : public APawn
